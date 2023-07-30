@@ -1,0 +1,479 @@
+@startuml
+
+!theme plain
+top to bottom direction
+skinparam linetype ortho
+
+class Address {
+  + Address(): 
+  + Address(Long, String, String, Integer): 
+  - address: String
+  - pinCode: Integer
+  - city: String
+  - id: Long
+  + builder(): AddressBuilder
+   city: String
+   address: String
+   id: Long
+   pinCode: Integer
+}
+class AddressBuilder {
+  ~ AddressBuilder(): 
+  + id(Long): AddressBuilder
+  + city(String): AddressBuilder
+  + address(String): AddressBuilder
+  + pinCode(Integer): AddressBuilder
+  + build(): Address
+  + toString(): String
+}
+interface AddressRepository << interface >>
+class AdminController {
+  + AdminController(): 
+  + approveAllDocuments(String): ResponseEntity<String>
+  + updateDocuments(List<FileDto>): ResponseEntity<String>
+  + updateRequiredDocumentsForDriver(List<String>, String): ResponseEntity<String>
+}
+class AdminService {
+  + AdminService(): 
+  + updateFileStatusByAdmin(List<FileDto>): void
+  + saveRequiredDocuments(List<String>, String): void
+  + approveAllFiles(String): void
+}
+class AmazonConfig {
+  + AmazonConfig(): 
+  + s3(): AmazonS3
+}
+interface AmazonS3Service << interface >> {
+  + upload(String, String, Optional<Map<String, String>>, MultipartFile): void
+  + delete(String, String): void
+}
+class AmazonS3ServiceImpl {
+  + AmazonS3ServiceImpl(): 
+  + upload(String, String, Optional<Map<String, String>>, MultipartFile): void
+  + delete(String, String): void
+}
+class CustomExceptionControllerAdvice {
+  + CustomExceptionControllerAdvice(): 
+  ~ badRequestExceptions(MissingServletRequestPartException): ErrorResponse
+  ~ documentTypeMisMatch(DocumentTypeMisMatchException): ErrorResponse
+  ~ unsupportedContentType(UnsupportedMediaTypeException): ErrorResponse
+  ~ handleMaxUploadFileException(MaxUploadSizeExceededException): ErrorResponse
+  ~ requestShouldContainAFile(MultipartException): ErrorResponse
+  ~ generalException(RuntimeException): ErrorResponse
+  ~ fileNotFound(FileNotFoundException): ErrorResponse
+  + handleValidationErrors(MethodArgumentNotValidException): ResponseEntity<Map<String, List<String>>>
+  ~ msgNotReadable(HttpMessageNotReadableException): ErrorResponse
+  - getErrorsMap(List<String>): Map<String, List<String>>
+  ~ missPathVariable(MissingPathVariableException): ErrorResponse
+  ~ badRequestException(MissingServletRequestParameterException): ErrorResponse
+  ~ shippingIDExists(ShippingDetailsExistsException): ErrorResponse
+  ~ userAlreadyExists(UserAlreadyExistsException): ErrorResponse
+  ~ missingFileException(HttpRequestMethodNotSupportedException): ErrorResponse
+  ~ invalidDocumentType(EmptyFileException): ErrorResponse
+  ~ fileAlreadyExists(FileAlreadyExistsException): ErrorResponse
+  ~ invalidStatus(Exception): ErrorResponse
+  ~ badRequest(InvalidRequestException): ErrorResponse
+  ~ driverOnBoardingException(DriverOnBoardingException): ErrorResponse
+}
+class CustomUserDetailsService {
+  + CustomUserDetailsService(): 
+  + loadUserByUsername(String): UserDetails
+  + mapRolesToAuthorities(Collection<Role>): Collection<GrantedAuthority>
+}
+class DateValidator {
+  + DateValidator(): 
+  + isValid(String): boolean
+}
+class DocumentTypeMisMatchException {
+  + DocumentTypeMisMatchException(String): 
+  + DocumentTypeMisMatchException(String, Throwable): 
+}
+interface DocumentsService << interface >> {
+  + uploadFile(MultipartFile, String, String): void
+  + getRequiredDocuments(String): List<String>
+  + updateDocument(Long, MultipartFile): void
+}
+class DocumentsServiceImpl {
+  + DocumentsServiceImpl(): 
+  - getExtensionByStringHandling(String): Optional<String>
+  - saveFileToS3(MultipartFile, String, String): void
+  + updateDocument(Long, MultipartFile): void
+  + getRequiredDocuments(String): List<String>
+  + uploadFile(MultipartFile, String, String): void
+}
+class Driver {
+  + Driver(Long, String, String, String, String, String, List<File>, String, List<ShippingDetails>, Address, Timestamp): 
+  + Driver(): 
+  - phoneNumber: String
+  - id: Long
+  - firstName: String
+  - availableForRide: String
+  - address: Address
+  - status: String
+  - email: String
+  - files: List<File>
+  - shippingDetails: List<ShippingDetails>
+  - createdAt: Timestamp
+  - lastName: String
+  + builder(): DriverBuilder
+   lastName: String
+   id: Long
+   email: String
+   createdAt: Timestamp
+   phoneNumber: String
+   availableForRide: String
+   status: String
+   firstName: String
+   files: List<File>
+   address: Address
+   shippingDetails: List<ShippingDetails>
+}
+class DriverBuilder {
+  ~ DriverBuilder(): 
+  + firstName(String): DriverBuilder
+  + createdAt(Timestamp): DriverBuilder
+  + id(Long): DriverBuilder
+  + lastName(String): DriverBuilder
+  + build(): Driver
+  + toString(): String
+  + status(String): DriverBuilder
+  + availableForRide(String): DriverBuilder
+  + email(String): DriverBuilder
+  + files(List<File>): DriverBuilder
+  + phoneNumber(String): DriverBuilder
+  + shippingDetails(List<ShippingDetails>): DriverBuilder
+  + address(Address): DriverBuilder
+}
+class DriverOnBoardingConstants {
+  + DriverOnBoardingConstants(): 
+}
+class DriverOnBoardingException {
+  + DriverOnBoardingException(String, Throwable): 
+  + DriverOnBoardingException(String): 
+}
+class DriverOnBoardingUrls {
+  + DriverOnBoardingUrls(): 
+}
+class DriverOnboardingController {
+  + DriverOnboardingController(): 
+  + registerDriver(UserRegistration): ResponseEntity<String>
+  + updateShippingDetails(ShippingDto): ResponseEntity<String>
+  + uploadDocument(MultipartFile, String, Authentication): ResponseEntity<String>
+  + requiredDocuments(String): List<String>
+  + getDocumentsByStatus(String, Authentication): ResponseEntity<Object>
+  + markRideAvailability(Authentication, Map<String, String>): String
+  + updateDocuments(MultipartFile, Long): ResponseEntity<String>
+}
+class DriverOnboardingServiceApplication {
+  + DriverOnboardingServiceApplication(): 
+  + main(String[]): void
+}
+interface DriverRepository << interface >> {
+  + findByEmail(String): Driver
+}
+interface DriverService << interface >> {
+  + getDocumentsByStatus(String, String): List<FileDto>
+  + saveDriverDetails(UserRegistration): void
+  + markRideAvailability(Map<String, String>, String): String
+  + updateShippingDetails(ShippingDto): void
+}
+class DriverServiceImpl {
+  + DriverServiceImpl(): 
+  + saveDriverDetails(UserRegistration): void
+  + markRideAvailability(Map<String, String>, String): String
+  + updateShippingDetails(ShippingDto): void
+  + getDocumentsByStatus(String, String): List<FileDto>
+}
+interface EmailService << interface >> {
+  + sendShippingDetailsMail(Driver, ShippingDto): void
+}
+class EmailServiceImpl {
+  + EmailServiceImpl(): 
+  + sendShippingDetailsMail(Driver, ShippingDto): void
+}
+class EmptyFileException {
+  + EmptyFileException(String): 
+  + EmptyFileException(String, Throwable): 
+}
+class ErrorResponse {
+  + ErrorResponse(String, Integer, String): 
+  + ErrorResponse(): 
+  - errorCode: Integer
+  - errorMsg: String
+  - status: String
+   status: String
+   errorCode: Integer
+   errorMsg: String
+}
+class File {
+  + File(Long, String, String, String, String, Driver, String, Timestamp): 
+  + File(): 
+  - createdAt: Timestamp
+  - path: String
+  - status: String
+  - documentType: String
+  - id: Long
+  - reason: String
+  - driver: Driver
+  - fileName: String
+  + builder(): FileBuilder
+   id: Long
+   createdAt: Timestamp
+   fileName: String
+   driver: Driver
+   status: String
+   reason: String
+   path: String
+   documentType: String
+}
+class FileBuilder {
+  ~ FileBuilder(): 
+  + id(Long): FileBuilder
+  + fileName(String): FileBuilder
+  + status(String): FileBuilder
+  + documentType(String): FileBuilder
+  + path(String): FileBuilder
+  + driver(Driver): FileBuilder
+  + reason(String): FileBuilder
+  + createdAt(Timestamp): FileBuilder
+  + build(): File
+  + toString(): String
+}
+class FileDto {
+  + FileDto(Long, String, String, String, String): 
+  + FileDto(): 
+  - status: String
+  - documentType: String
+  - reason: String
+  - id: Long
+  - fileName: String
+  + builder(): FileDtoBuilder
+   status: String
+   reason: String
+   id: Long
+   fileName: String
+   documentType: String
+}
+class FileDtoBuilder {
+  ~ FileDtoBuilder(): 
+  + id(Long): FileDtoBuilder
+  + fileName(String): FileDtoBuilder
+  + status(String): FileDtoBuilder
+  + documentType(String): FileDtoBuilder
+  + reason(String): FileDtoBuilder
+  + build(): FileDto
+  + toString(): String
+}
+interface FileRepository << interface >>
+class FileValidator {
+  + FileValidator(): 
+  + isValidFile(MultipartFile, String): boolean
+  - isSupportedContentType(String): boolean
+  - checkDocumentsContainsInRequiredDocs(String): boolean
+}
+class InvalidRequestException {
+  + InvalidRequestException(String, Throwable): 
+  + InvalidRequestException(String): 
+}
+class MessageConstants {
+  + MessageConstants(): 
+}
+class RequiredDocuments {
+  + RequiredDocuments(Long, String, String): 
+  + RequiredDocuments(): 
+  - id: Long
+  - role: String
+  - documents: String
+  + builder(): RequiredDocumentsBuilder
+   id: Long
+   documents: String
+   role: String
+}
+class RequiredDocumentsBuilder {
+  ~ RequiredDocumentsBuilder(): 
+  + id(Long): RequiredDocumentsBuilder
+  + role(String): RequiredDocumentsBuilder
+  + documents(String): RequiredDocumentsBuilder
+  + build(): RequiredDocuments
+  + toString(): String
+}
+interface RequiredDocumentsRepository << interface >> {
+  + findByRole(String): RequiredDocuments
+}
+enum RideStatus << enumeration >> {
+  + RideStatus(): 
+  + values(): RideStatus[]
+  + valueOf(String): RideStatus
+}
+class Role {
+  + Role(Long, String, List<User>): 
+  + Role(): 
+  + Role(String): 
+  - name: String
+  - id: Long
+  - users: List<User>
+   name: String
+   id: Long
+   users: List<User>
+}
+interface RoleRepository << interface >> {
+  + findByName(String): Role
+}
+class SecurityConfiguration {
+  + SecurityConfiguration(): 
+  + filterChain(HttpSecurity): SecurityFilterChain
+  + passwordEncoder(): PasswordEncoder
+  + configureGlobal(AuthenticationManagerBuilder): void
+}
+class ShippingDetails {
+  + ShippingDetails(Long, String, String, String, String, Date, Driver, Timestamp): 
+  + ShippingDetails(): 
+  - courierCompany: String
+  - trackingId: String
+  - id: Long
+  - deviceId: String
+  - estimatedDate: Date
+  - createdAt: Timestamp
+  - deliveryStatus: String
+  - driver: Driver
+  + builder(): ShippingDetailsBuilder
+   id: Long
+   createdAt: Timestamp
+   courierCompany: String
+   driver: Driver
+   trackingId: String
+   deviceId: String
+   estimatedDate: Date
+   deliveryStatus: String
+}
+class ShippingDetailsBuilder {
+  ~ ShippingDetailsBuilder(): 
+  + id(Long): ShippingDetailsBuilder
+  + trackingId(String): ShippingDetailsBuilder
+  + courierCompany(String): ShippingDetailsBuilder
+  + deviceId(String): ShippingDetailsBuilder
+  + deliveryStatus(String): ShippingDetailsBuilder
+  + estimatedDate(Date): ShippingDetailsBuilder
+  + driver(Driver): ShippingDetailsBuilder
+  + createdAt(Timestamp): ShippingDetailsBuilder
+  + build(): ShippingDetails
+  + toString(): String
+}
+class ShippingDetailsExistsException {
+  + ShippingDetailsExistsException(String): 
+  + ShippingDetailsExistsException(String, Throwable): 
+}
+class ShippingDto {
+  + ShippingDto(): 
+  + ShippingDto(String, String, String, String, String, String): 
+  - trackingId: String
+  - courierCompany: String
+  - deliveryStatus: String
+  - estimatedDate: String
+  - deviceId: String
+  - userEmail: String
+  + builder(): ShippingDtoBuilder
+   trackingId: String
+   userEmail: String
+   deviceId: String
+   estimatedDate: String
+   courierCompany: String
+   deliveryStatus: String
+}
+class ShippingDtoBuilder {
+  ~ ShippingDtoBuilder(): 
+  + userEmail(String): ShippingDtoBuilder
+  + trackingId(String): ShippingDtoBuilder
+  + courierCompany(String): ShippingDtoBuilder
+  + deviceId(String): ShippingDtoBuilder
+  + deliveryStatus(String): ShippingDtoBuilder
+  + estimatedDate(String): ShippingDtoBuilder
+  + build(): ShippingDto
+  + toString(): String
+}
+interface ShippingRepository << interface >>
+enum Status << enumeration >> {
+  + Status(): 
+  + valueOf(String): Status
+  + values(): Status[]
+}
+class User {
+  + User(Long, String, String, Timestamp, List<Role>): 
+  + User(): 
+  + User(String, String, List<Role>): 
+  - roles: List<Role>
+  - email: String
+  - password: String
+  - createdAt: Timestamp
+  - id: Long
+  + builder(): UserBuilder
+   password: String
+   roles: List<Role>
+   id: Long
+   email: String
+   createdAt: Timestamp
+}
+class UserAlreadyExistsException {
+  + UserAlreadyExistsException(String): 
+  + UserAlreadyExistsException(String, Throwable): 
+}
+class UserBuilder {
+  ~ UserBuilder(): 
+  + id(Long): UserBuilder
+  + email(String): UserBuilder
+  + password(String): UserBuilder
+  + createdAt(Timestamp): UserBuilder
+  + roles(List<Role>): UserBuilder
+  + build(): User
+  + toString(): String
+}
+class UserRegistration {
+  + UserRegistration(): 
+  + UserRegistration(String, String, String, String, String, String, Boolean, String, Integer): 
+  - pinCode: Integer
+  - firstName: String
+  - email: String
+  - city: String
+  - isDriver: Boolean
+  - address: String
+  - password: String
+  - lastName: String
+  - phoneNumber: String
+   password: String
+   lastName: String
+   email: String
+   pinCode: Integer
+   phoneNumber: String
+   city: String
+   firstName: String
+   address: String
+   isDriver: Boolean
+}
+interface UserRepository << interface >> {
+  + findByEmail(String): User
+}
+interface UserService << interface >> {
+  + findUserByEmail(String): User
+  + save(UserRegistration): User
+}
+class UserServiceImpl {
+  + UserServiceImpl(): 
+  - createDriverRole(): Role
+  + findUserByEmail(String): User
+  + save(UserRegistration): User
+}
+
+AddressBuilder                      +-[#820000,plain]-  Address                            
+AmazonS3ServiceImpl                 -[#008200,dashed]-^  AmazonS3Service                    
+DocumentsServiceImpl                -[#008200,dashed]-^  DocumentsService                   
+DriverBuilder                       +-[#820000,plain]-  Driver                             
+DriverServiceImpl                   -[#008200,dashed]-^  DriverService                      
+EmailServiceImpl                    -[#008200,dashed]-^  EmailService                       
+FileBuilder                         +-[#820000,plain]-  File                               
+FileDtoBuilder                      +-[#820000,plain]-  FileDto                            
+RequiredDocumentsBuilder            +-[#820000,plain]-  RequiredDocuments                  
+ShippingDetailsBuilder              +-[#820000,plain]-  ShippingDetails                    
+ShippingDtoBuilder                  +-[#820000,plain]-  ShippingDto                        
+UserBuilder                         +-[#820000,plain]-  User                               
+UserServiceImpl                     -[#008200,dashed]-^  UserService                        
+@enduml
